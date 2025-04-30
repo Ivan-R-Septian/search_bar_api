@@ -32,7 +32,7 @@ export default async function handler(req, res) {
             totalDP: item.totalDP,
             promo: item.promo
           }))
-        : (authHeader ? [] : [errorMessage]) // Jika token salah dan tidak ada data, tampilkan errorMessage
+        : (authHeader ? [] : errorMessage) // Jika token salah dan tidak ada data, tampilkan errorMessage
     };
 
     res.status(200).json(transformed);
