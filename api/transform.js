@@ -13,27 +13,9 @@ export default async function handler(req, res) {
       body: JSON.stringify(req.body),
     });
 
-    // Jika status bukan 200, berarti ada masalah pada authentication atau request
-    if (!response.ok) {
-      return res.status(200).json({
-        message: "Full authentication is required to access this resource",
-        data: []
-      });
-    }
-
     const result = await response.json();
-
-    // Cek apakah data ada, jika tidak kirimkan response error juga
     const rawData = result?.data?.value;
 
-    if (!rawData) {
-      return res.status(200).json({
-        message: "Full authentication is required to access this resource",
-        data: []
-      });
-    }
-
-    // Jika data ditemukan, lakukan pemetaan data seperti yang diminta
     const transformed = {
       message: rawData?.message || "success",
       data: rawData?.data?.map((item) => ({
@@ -43,7 +25,7 @@ export default async function handler(req, res) {
         installment: item.installment,
         totalDP: item.totalDP,
         promo: item.promo
-      })) || [] // Jika tidak ada data, kosongkan array
+      })) || []
     };
 
     res.status(200).json(transformed);
