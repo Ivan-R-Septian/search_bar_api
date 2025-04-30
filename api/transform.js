@@ -13,6 +13,11 @@ export default async function handler(req, res) {
       body: JSON.stringify(req.body),
     });
 
+    // Jika respons dari webhook tidak valid (misal token salah)
+    if (!response.ok) {
+      throw new Error("Invalid token or authentication failed");
+    }
+
     const result = await response.json();
 
     const rawData = result?.data?.value;
@@ -32,12 +37,18 @@ export default async function handler(req, res) {
             totalDP: item.totalDP,
             promo: item.promo
           }))
-        : (authHeader ? [] : errorMessage) // Jika token salah dan tidak ada data, tampilkan errorMessage
+        : [] // Jika data kosong, tetap kirimkan array kosong
     };
+
+    // Jika data kosong dan token tidak valid, kirimkan pesan error
+    if (transformed.data.length === 0 && !authHeader) {
+      transformed.data = [errorMessage];
+    }
 
     res.status(200).json(transformed);
 
   } catch (error) {
+    // Menangani error jika ada masalah dengan token atau lain-lain
     res.status(500).json({ message: "error", error: error.toString() });
   }
 }
