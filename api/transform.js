@@ -1,5 +1,4 @@
 export default async function handler(req, res) {
-  // Ambil data dari webhook
   const webhookUrl = "https://generative.3dolphins.ai:9443/dolphin/apiv1/graph/workflow/8d69eb3022b76f955740c336a18f66a4/WF/node-1744633504830/webhook";
 
   try {
@@ -8,12 +7,11 @@ export default async function handler(req, res) {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(req.body), // forward user request
+      body: JSON.stringify(req.body),
     });
 
     const result = await response.json();
 
-    // Ambil value.data dari response webhook
     const rawData = result?.data?.value;
 
     const transformed = {
@@ -31,7 +29,6 @@ export default async function handler(req, res) {
     res.status(200).json(transformed);
 
   } catch (error) {
-    console.error("Error:", error);
-    res.status(500).json({ message: "Internal Server Error", error: error.toString() });
+    res.status(500).json({ message: "error", error: error.toString() });
   }
 }
