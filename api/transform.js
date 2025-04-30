@@ -35,7 +35,8 @@ export default async function handler(req, res) {
             price: item.price,
             installment: item.installment,
             totalDP: item.totalDP,
-            promo: item.promo
+            promo: item.promo,
+            failed: item.failed
           }))
         : [] // Jika data kosong, tetap kirimkan array kosong
     };
