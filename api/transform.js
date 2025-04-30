@@ -14,18 +14,25 @@ export default async function handler(req, res) {
     });
 
     const result = await response.json();
+
     const rawData = result?.data?.value;
 
+    // Variable untuk error jika token salah
+    const errorMessage = "Full authentication is required to access this resource";
+
+    // Cek jika data ada atau tidak
     const transformed = {
-      message: rawData?.message || "success",
-      data: rawData?.data?.map((item) => ({
-        brand: item.brand,
-        model: item.model,
-        price: item.price,
-        installment: item.installment,
-        totalDP: item.totalDP,
-        promo: item.promo
-      })) || []
+      message: "success", // Pesan tetap success
+      data: rawData?.data?.length > 0
+        ? rawData.data.map((item) => ({
+            brand: item.brand,
+            model: item.model,
+            price: item.price,
+            installment: item.installment,
+            totalDP: item.totalDP,
+            promo: item.promo
+          }))
+        : (authHeader ? [] : [errorMessage]) // Jika token salah dan tidak ada data, tampilkan errorMessage
     };
 
     res.status(200).json(transformed);
