@@ -1,7 +1,17 @@
 export default async function handler(req, res) {
-  const webhookUrl = "https://generative.3dolphins.ai:9443/dolphin/apiv1/graph/workflow/8d69eb3022b76f955740c336a18f66a4/WF/node-1744633504830/webhook";
 
-  const authHeader = req.headers['authorization'] || ''; // Ambil header, kalau nggak ada tetap kirim kosong
+  res.setHeader("Access-Control-Allow-Origin", "*"); 
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+
+  // Tangani preflight (OPTIONS) agar tidak error
+  if (req.method === "OPTIONS") {
+    return res.status(200).end();
+  }
+
+  // Lanjut ke handler kamu
+  const webhookUrl = "https://generative.3dolphins.ai:9443/dolphin/apiv1/graph/workflow/8d69eb3022b76f955740c336a18f66a4/WF/node-1744633504830/webhook";
+  const authHeader = req.headers['authorization'] || '';
 
   try {
     const response = await fetch(webhookUrl, {
@@ -13,21 +23,15 @@ export default async function handler(req, res) {
       body: JSON.stringify(req.body),
     });
 
-    // Jika respons dari webhook tidak valid (misal token salah)
     if (!response.ok) {
       throw new Error("Invalid token or authentication failed");
     }
 
     const result = await response.json();
-
     const rawData = result?.data?.value;
 
-    // Variable untuk error jika token salah
-    const errorMessage = "Full authentication is required to access this resource";
-
-    // Cek jika data ada atau tidak
     const transformed = {
-      message: "success", // Pesan tetap success
+      message: "success",
       data: rawData?.data?.length > 0
         ? rawData.data.map((item) => ({
             brand: item.brand,
@@ -38,18 +42,16 @@ export default async function handler(req, res) {
             promo: item.promo,
             failed: item.failed
           }))
-        : [] // Jika data kosong, tetap kirimkan array kosong
+        : []
     };
 
-    // Jika data kosong dan token tidak valid, kirimkan pesan error
     if (transformed.data.length === 0 && !authHeader) {
-      transformed.data = [errorMessage];
+      transformed.data = ["Full authentication is required to access this resource"];
     }
 
     res.status(200).json(transformed);
 
   } catch (error) {
-    // Menangani error jika ada masalah dengan token atau lain-lain
     res.status(500).json({ message: "error", error: error.toString() });
   }
 }
